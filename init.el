@@ -31,6 +31,8 @@ values."
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
    '(
+     javascript
+     html
      python
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
@@ -49,14 +51,14 @@ values."
      ;;        shell-default-position 'bottom)
      ;; spell-checking
      syntax-checking
-     ;; version-control
+     version-control
      themes-megapack
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '()
+   dotspacemacs-additional-packages '(highlight-indent-guides)
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
@@ -129,9 +131,7 @@ values."
    ;; Press <SPC> T n to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
    dotspacemacs-themes '(sanityinc-solarized-light
-                         sanityinc-tomorrow-night
-                         spacemacs-light
-                         spacemacs-dark)
+                         sanityinc-tomorrow-night)
    ;; If non nil the cursor color matches the state color in GUI Emacs.
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
@@ -294,11 +294,7 @@ executes.
  This function is mostly useful for variables that need to be set
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
-  (spacemacs|add-toggle underscore-part-of-word
-    :documentation "Treat underscore as part of a word."
-    :status (eq (char-syntax ?_) ?w)
-    :on (modify-syntax-entry ?_ "w")
-    :off (modify-syntax-entry ?_ "_"))
+  (setq highlight-indent-guides-method 'character)
   )
 
 (defun dotspacemacs/user-config ()
@@ -308,6 +304,7 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
+  (setq debug-on-error t)
   ;;; Add rust mode
   ;; (load-user-file "rust-mode/rust-mode.el")
   ;; (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))
@@ -317,20 +314,43 @@ you should place your code here."
   ;; (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
   ;; (setq highlight-indent-guides-method 'character)
 
-  ;;; Tell projectile to ignore .pyc files and other trash.
-  (add-to-list 'projectile-globally-ignored-file-suffixes ".pyc")
-  (add-to-list 'projectile-globally-ignored-file-suffixes "~")
+  ;; ;;; Tell projectile to ignore .pyc files and other trash.
+  ;; (add-to-list 'projectile-globally-ignored-file-suffixes ".pyc")
+  ;; (add-to-list 'projectile-globally-ignored-file-suffixes "~")
+
+  ;;; Command for restarting flycheck checker after it has encountered too many
+  ;;; errors.
+  (defun my-flycheck-restart-checker ()
+    "Restart flycheck."
+    (interactive)
+    (setq flycheck-disabled-checkers nil)
+    (flycheck-buffer))
 
   ;;; Don't treat underscore as word separator in python. This is important
-  ;; e.g. when using * for searching for a word.
-  ;; For python
-  ;; (add-hook 'python-mode-hook #'(lambda () (modify-syntax-entry ?_ "w")))
-  (spacemacs/toggle-underscore-part-of-word-on)
+  ;;; e.g. when using * for searching for a word.
+  (spacemacs|add-toggle underscore-part-of-word
+    :documentation "Treat underscore as part of a word."
+    :status (eq (char-syntax ?_) ?w)
+    :on (modify-syntax-entry ?_ "w")
+    :off (modify-syntax-entry ?_ "_"))
+  (add-hook 'python-mode-hook 'spacemacs/toggle-underscore-part-of-word-on)
 
+  ;;; Backspace should pass line endings.
   (define-key evil-normal-state-map (kbd "<backspace>") 'backward-char)
-  (define-key evil-normal-state-map (kbd "s") 'evil-surround-edit)
 
-  ;; (setq highlight-indent-guides-method 'character)
+  ;;; Q as alias for gq.
+  (define-key evil-normal-state-map (kbd "Q") 'evil-fill-and-move)
+
+  ;; (define-key evil-normal-state-map (kbd "s") 'evil-surround-edit)
+
+  ;;; Define safe select window functions
+  (dotimes (i 10)
+    (eval `(defun ,(intern (format "safe-select-window-%s" i)) ()
+             "Select the window with number %i. No argument accepted."
+             (interactive)
+             (select-window-by-number ,i)))
+    (define-key evil-normal-state-map (kbd (format "SPC %s" i))
+      (intern (format "safe-select-window-%s" i))))
 
   ;; ;;; Define evil motions for flycheck to make sure that ] e and [ e don't create
   ;; ;;; repeatable commands.
@@ -342,6 +362,18 @@ you should place your code here."
   ;;   "Move to previous flycheck error as an evil motion."
   ;;   (evil-motion-loop (nil (or count 1))
   ;;     (flycheck-previous-error)))
+
+  ;; ;;; Bind some vim keys
+  ;; (define-key evil-normal-state-map (kbd "C-q") 'evil-visual-block)
+  ;; (define-key evil-normal-state-map (kbd "C-w q") 'evil-window-delete)
+  ;; (evil-define-key 'normal emacs-lisp-mode-map (kbd "K")
+  ;;   'elisp-slime-nav-describe-elisp-thing-at-point)
+  ;; (define-key evil-normal-state-map (kbd "C-p") 'helm-my-mini)
+  ;; (define-key evil-normal-state-map (kbd "M-x") 'helm-M-x)
+  ;; (define-key evil-normal-state-map (kbd "<backspace>") 'backward-char)
+  ;; (define-key evil-normal-state-map (kbd "SPC") 'forward-char)
+  ;; (define-key evil-insert-state-map (kbd "C-v") 'evil-visual-paste)
+  ;; (define-key evil-normal-state-map (kbd "Q") 'evil-fill-and-move)
 
   ;; ;;; Extend the "vim language" with more motions, textobjects and operators
   ;; ;; Motions
@@ -362,6 +394,7 @@ you should place your code here."
   ;; (define-key evil-normal-state-map (kbd "C-w H") 'colshift/shift-left)
   ;; (define-key evil-normal-state-map (kbd "C-w L") 'colshift/shift-right)
   ;; (define-key evil-normal-state-map (kbd "C-w q") 'evil-window-delete)
+  (setq debug-on-error nil)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
