@@ -31,6 +31,7 @@ values."
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
    '(
+     shell-scripts
      javascript
      html
      python
@@ -250,8 +251,18 @@ values."
    ;; scrolling overrides the default behavior of Emacs which recenters point
    ;; when it reaches the top or bottom of the screen. (default t)
    dotspacemacs-smooth-scrolling t
-   ;; If non nil line numbers are turned on in all `prog-mode' and `text-mode'
-   ;; derivatives. If set to `relative', also turns on relative line numbers.
+   ;; Control line numbers activation.
+   ;; If set to `t' or `relative' line numbers are turned on in all `prog-mode' and
+   ;; `text-mode' derivatives. If set to `relative', line numbers are relative.
+   ;; This variable can also be set to a property list for finer control:
+   ;; '(:relative nil
+   ;;   :disabled-for-modes dired-mode
+   ;;                       doc-view-mode
+   ;;                       markdown-mode
+   ;;                       org-mode
+   ;;                       pdf-view-mode
+   ;;                       text-mode
+   ;;   :size-limit-kb 1000)
    ;; (default nil)
    dotspacemacs-line-numbers nil
    ;; Code folding method. Possible values are `evil' and `origami'.
@@ -294,7 +305,10 @@ executes.
  This function is mostly useful for variables that need to be set
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
-  (setq highlight-indent-guides-method 'character)
+  (setq
+   highlight-indent-guides-method 'character
+   python-auto-set-local-pyenv-version 'on-project-switch
+   )
   )
 
 (defun dotspacemacs/user-config ()
@@ -305,12 +319,15 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
   (setq debug-on-error t)
+  ;;; No acceleration in mouse scroll speed:
+  (setq mouse-wheel-progressive-speed nil)
+  (setq sp-escape-quotes-after-insert nil)
+
   ;;; Add rust mode
   ;; (load-user-file "rust-mode/rust-mode.el")
   ;; (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))
 
-  ;;; Nice indent highlighting
-  ;; (require 'highlight-indent-guides)
+  ;; ;;; Nice indent highlighting
   ;; (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
   ;; (setq highlight-indent-guides-method 'character)
 
@@ -326,13 +343,27 @@ you should place your code here."
     (setq flycheck-disabled-checkers nil)
     (flycheck-buffer))
 
+  ;; ;;; Enable linum-mode only in the buffer of the currently select window.
+  ;; ;;; TODO: Make this play nice with ahs transient mode.
+  ;; (defun linum-mode-only-in-current (orig-fun &rest args)
+  ;;   "Disable linum-mode in the buffer that I am leaving, and enable it in the
+  ;;   one I'm going to."
+  ;;   (if (not (string-match-p "^ ?\\*.*\\*$" (buffer-name (window-buffer))))
+  ;;       (linum-mode 0))
+  ;;   (apply orig-fun args)
+  ;;   (if (not (string-match-p "^ ?\\*.*\\*$" (buffer-name (window-buffer))))
+  ;;     (linum-mode 1)))
+  ;; (advice-add 'set-window-buffer :around #'linum-mode-only-in-current)
+  ;; (advice-add 'select-window :around #'linum-mode-only-in-current)
+
   ;;; Don't treat underscore as word separator in python. This is important
-  ;;; e.g. when using * for searching for a word.
+  ;;; e.g. when using * for searching for a word. Test_word.
   (spacemacs|add-toggle underscore-part-of-word
     :documentation "Treat underscore as part of a word."
     :status (eq (char-syntax ?_) ?w)
     :on (modify-syntax-entry ?_ "w")
-    :off (modify-syntax-entry ?_ "_"))
+    :off (modify-syntax-entry ?_ "_")
+    :evil-leader "t_")
   (add-hook 'python-mode-hook 'spacemacs/toggle-underscore-part-of-word-on)
 
   ;;; Backspace should pass line endings.
@@ -348,9 +379,11 @@ you should place your code here."
     (eval `(defun ,(intern (format "safe-select-window-%s" i)) ()
              "Select the window with number %i. No argument accepted."
              (interactive)
-             (select-window-by-number ,i)))
+             (winum-select-window-by-number ,i)))
     (define-key evil-normal-state-map (kbd (format "SPC %s" i))
       (intern (format "safe-select-window-%s" i))))
+
+  ;;; Work around a bug which makes previous-line go up by two lines at a time:
 
   ;; ;;; Define evil motions for flycheck to make sure that ] e and [ e don't create
   ;; ;;; repeatable commands.
