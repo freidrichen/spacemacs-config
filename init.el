@@ -379,7 +379,7 @@ you should place your code here."
     (eval `(defun ,(intern (format "safe-select-window-%s" i)) ()
              "Select the window with number %i. No argument accepted."
              (interactive)
-             (winum-select-window-by-number ,i)))
+             (select-window-by-number ,i)))
     (define-key evil-normal-state-map (kbd (format "SPC %s" i))
       (intern (format "safe-select-window-%s" i))))
 
