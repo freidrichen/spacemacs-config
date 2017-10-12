@@ -323,6 +323,13 @@ you should place your code here."
   (setq mouse-wheel-progressive-speed nil)
   (setq sp-escape-quotes-after-insert nil)
 
+  ;;; Spaceline configuration:
+  (setq powerline-default-separator 'contour)
+  ;; TODO: Hide vi-tilde-fringe-mode, which-key-mode, and possibly others
+  ;; TODO: Hide or shorten some segments by defining my own segments and
+  ;; compiling my on modeline format.
+  ;; TODO: Try to hide segments gradually when frame width derceases
+
   ;;; Add rust mode
   ;; (load-user-file "rust-mode/rust-mode.el")
   ;; (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))
