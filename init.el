@@ -322,6 +322,7 @@ you should place your code here."
   ;;; No acceleration in mouse scroll speed:
   (setq mouse-wheel-progressive-speed nil)
   (setq sp-escape-quotes-after-insert nil)
+  (setq exec-path-from-shell-check-startup-files nil)
 
   ;;; Spaceline configuration:
   (setq powerline-default-separator 'contour)
