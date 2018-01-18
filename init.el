@@ -31,6 +31,7 @@ values."
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
    '(
+     rust
      shell-scripts
      javascript
      html
@@ -213,7 +214,7 @@ values."
    dotspacemacs-enable-paste-transient-state nil
    ;; Which-key delay in seconds. The which-key buffer is the popup listing
    ;; the commands bound to the current keystroke sequence. (default 0.4)
-   dotspacemacs-which-key-delay 0.4
+   dotspacemacs-which-key-delay 0.6
    ;; Which-key frame position. Possible values are `right', `bottom' and
    ;; `right-then-bottom'. right-then-bottom tries to display the frame to the
    ;; right; if there is insufficient space it displays it at the bottom.
@@ -232,7 +233,7 @@ values."
    ;; If non nil the frame is maximized when Emacs starts up.
    ;; Takes effect only if `dotspacemacs-fullscreen-at-startup' is nil.
    ;; (default nil) (Emacs 24.4+ only)
-   dotspacemacs-maximized-at-startup nil
+   dotspacemacs-maximized-at-startup t
    ;; A value from the range (0..100), in increasing opacity, which describes
    ;; the transparency level of a frame when it's active or selected.
    ;; Transparency can be toggled through `toggle-transparency'. (default 90)
@@ -323,17 +324,18 @@ you should place your code here."
   (setq mouse-wheel-progressive-speed nil)
   (setq sp-escape-quotes-after-insert nil)
   (setq exec-path-from-shell-check-startup-files nil)
+  ;; TODO: Disable matchit-mode. At least in Python. Or move it to another key.
 
   ;;; Spaceline configuration:
   (setq powerline-default-separator 'contour)
-  ;; TODO: Hide vi-tilde-fringe-mode, which-key-mode, and possibly others
-  ;; TODO: Hide or shorten some segments by defining my own segments and
-  ;; compiling my on modeline format.
-  ;; TODO: Try to hide segments gradually when frame width derceases
-
-  ;;; Add rust mode
-  ;; (load-user-file "rust-mode/rust-mode.el")
-  ;; (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))
+  (spaceline-toggle-buffer-size-off)
+  (spaceline-toggle-buffer-encoding-abbrev-off)
+  (spaceline-toggle-version-control-off)
+  (spaceline-toggle-python-pyenv-off)
+  ;; TODO: Hide which-key-mode, and possibly other minor modes using diminish
+  ;; TODO: Shorten some segments by defining my own segments and compiling my on
+  ;; modeline format?
+  ;; TODO: Try to hide segments gradually when frame width decreases
 
   ;; ;;; Nice indent highlighting
   ;; (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
@@ -391,6 +393,16 @@ you should place your code here."
     (define-key evil-normal-state-map (kbd (format "SPC %s" i))
       (intern (format "safe-select-window-%s" i))))
 
+  ;; ;;; Define an evil operator which "stamps" over a text object/motion/visual
+  ;; ;;; selection.
+  ;; (evil-define-operator my-stamp-last-yanked (beg end)
+  ;;   "Delete the selected text into the black hole register and replace it
+  ;;   with the last yanked text."
+  ;;   (interactive "<R><x><y>")
+  ;;   (evil-delete beg end count :register "_")
+  ;;   (evil-paste-after))
+  ;; (define-key evil-normal-state-map (kbd "g r") 'my-stamp-last-yanked)
+
   ;;; Work around a bug which makes previous-line go up by two lines at a time:
 
   ;; ;;; Define evil motions for flycheck to make sure that ] e and [ e don't create
@@ -406,15 +418,8 @@ you should place your code here."
 
   ;; ;;; Bind some vim keys
   ;; (define-key evil-normal-state-map (kbd "C-q") 'evil-visual-block)
-  ;; (define-key evil-normal-state-map (kbd "C-w q") 'evil-window-delete)
-  ;; (evil-define-key 'normal emacs-lisp-mode-map (kbd "K")
-  ;;   'elisp-slime-nav-describe-elisp-thing-at-point)
-  ;; (define-key evil-normal-state-map (kbd "C-p") 'helm-my-mini)
-  ;; (define-key evil-normal-state-map (kbd "M-x") 'helm-M-x)
-  ;; (define-key evil-normal-state-map (kbd "<backspace>") 'backward-char)
   ;; (define-key evil-normal-state-map (kbd "SPC") 'forward-char)
   ;; (define-key evil-insert-state-map (kbd "C-v") 'evil-visual-paste)
-  ;; (define-key evil-normal-state-map (kbd "Q") 'evil-fill-and-move)
 
   ;; ;;; Extend the "vim language" with more motions, textobjects and operators
   ;; ;; Motions
@@ -440,3 +445,18 @@ you should place your code here."
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(evil-want-Y-yank-to-eol nil)
+ '(package-selected-packages
+   (quote
+    (toml-mode racer flycheck-rust seq cargo rust-mode zenburn-theme yapfify which-key web-mode use-package ujelly-theme toc-org tao-theme tangotango-theme sublime-themes spaceline powerline solarized-theme slim-mode restart-emacs rainbow-delimiters pyvenv pytest pyenv-mode pug-mode phoenix-dark-pink-theme phoenix-dark-mono-theme persp-mode organic-green-theme org-plus-contrib obsidian-theme neotree mustang-theme move-text monokai-theme moe-theme live-py-mode link-hint json-mode js2-refactor multiple-cursors jbeans-theme jazz-theme insert-shebang inkpot-theme info+ hy-mode hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides zonokai-theme zen-and-art-theme ws-butler winum web-beautify volatile-highlights vi-tilde-fringe uuidgen underwater-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme tronesque-theme toxi-theme tango-plus-theme tango-2-theme tagedit sunny-day-theme subatomic256-theme subatomic-theme spacegray-theme soothe-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme scss-mode sass-mode reverse-theme request railscasts-theme py-isort purple-haze-theme professional-theme popwin planet-theme pip-requirements pcre2el pastels-on-dark-theme parent-mode paradox org-bullets open-junk-file omtose-phellack-theme oldlace-theme occidental-theme noctilux-theme niflheim-theme naquadah-theme monochrome-theme molokai-theme minimal-theme material-theme majapahit-theme madhat2r-theme macrostep lush-theme lorem-ipsum livid-mode linum-relative light-soap-theme less-css-mode json-snatcher json-reformat js-doc ir-black-theme indent-guide hide-comnt heroku-theme hemisu-theme help-fns+ helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme google-translate golden-ratio git-gutter-fringe git-gutter-fringe+ gandalf-theme fuzzy flycheck-pos-tip flx-ido flatui-theme flatland-theme fish-mode firebelly-theme fill-column-indicator farmhouse-theme fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu espresso-theme emmet-mode elisp-slime-nav dumb-jump dracula-theme django-theme diminish diff-hl define-word darktooth-theme darkokai-theme darkmine-theme darkburn-theme dakrone-theme cython-mode cyberpunk-theme company-web company-tern company-statistics company-shell company-anaconda column-enforce-mode color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized coffee-mode clues-theme clean-aindent-mode cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme bind-key badwolf-theme auto-yasnippet auto-highlight-symbol auto-compile apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes aggressive-indent afternoon-theme adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((t (:background nil)))))
