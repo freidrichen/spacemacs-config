@@ -31,6 +31,7 @@ values."
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
    '(
+     csv
      rust
      shell-scripts
      javascript
@@ -45,7 +46,7 @@ values."
      auto-completion
      ;; better-defaults
      emacs-lisp
-     ;; git
+     git
      ;; markdown
      ;; org
      ;; (shell :variables
@@ -139,7 +140,7 @@ values."
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
    dotspacemacs-default-font '("Source Code Pro"
-                               :size 13
+                               :size 13  ;; 16
                                :weight normal
                                :width normal
                                :powerline-scale 1.1)
@@ -326,6 +327,9 @@ you should place your code here."
   (setq exec-path-from-shell-check-startup-files nil)
   ;; TODO: Disable matchit-mode. At least in Python. Or move it to another key.
 
+  ;;; Attempt to work around the bug in undo-tree where
+  (setq undo-tree-enable-undo-in-region nil)
+
   ;;; Spaceline configuration:
   (setq powerline-default-separator 'contour)
   (spaceline-toggle-buffer-size-off)
@@ -393,6 +397,17 @@ you should place your code here."
     (define-key evil-normal-state-map (kbd (format "SPC %s" i))
       (intern (format "safe-select-window-%s" i))))
 
+  ;; ;;; Attempt to fix paragraph filling of python strings:
+  ;; (defun odd-number-of-single-quotes-this-paragraph-so-far ()
+  ;;   (oddp (how-many "'" (save-excursion (backward-paragraph) (point)) (point))))
+  ;; (defun odd-number-of-double-quotes-this-paragraph-so-far ()
+  ;;   (oddp (how-many "\"" (save-excursion (backward-paragraph) (point)) (point))))
+  ;; (add-to-list 'fill-nobreak-predicate
+  ;;              'odd-number-of-single-quotes-this-paragraph-so-far)
+  ;; (add-to-list 'fill-nobreak-predicate
+  ;;              'odd-number-of-double-quotes-this-paragraph-so-far)
+  ;; ; Didn't work =( Always keeps single quoted strings as long lines instead of breaking them and inserting new quotes.
+
   ;; ;;; Define an evil operator which "stamps" over a text object/motion/visual
   ;; ;;; selection.
   ;; (evil-define-operator my-stamp-last-yanked (beg end)
@@ -402,8 +417,6 @@ you should place your code here."
   ;;   (evil-delete beg end count :register "_")
   ;;   (evil-paste-after))
   ;; (define-key evil-normal-state-map (kbd "g r") 'my-stamp-last-yanked)
-
-  ;;; Work around a bug which makes previous-line go up by two lines at a time:
 
   ;; ;;; Define evil motions for flycheck to make sure that ] e and [ e don't create
   ;; ;;; repeatable commands.
@@ -451,9 +464,10 @@ you should place your code here."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(evil-want-Y-yank-to-eol nil)
+ '(js-indent-level 2)
  '(package-selected-packages
    (quote
-    (toml-mode racer flycheck-rust seq cargo rust-mode zenburn-theme yapfify which-key web-mode use-package ujelly-theme toc-org tao-theme tangotango-theme sublime-themes spaceline powerline solarized-theme slim-mode restart-emacs rainbow-delimiters pyvenv pytest pyenv-mode pug-mode phoenix-dark-pink-theme phoenix-dark-mono-theme persp-mode organic-green-theme org-plus-contrib obsidian-theme neotree mustang-theme move-text monokai-theme moe-theme live-py-mode link-hint json-mode js2-refactor multiple-cursors jbeans-theme jazz-theme insert-shebang inkpot-theme info+ hy-mode hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides zonokai-theme zen-and-art-theme ws-butler winum web-beautify volatile-highlights vi-tilde-fringe uuidgen underwater-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme tronesque-theme toxi-theme tango-plus-theme tango-2-theme tagedit sunny-day-theme subatomic256-theme subatomic-theme spacegray-theme soothe-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme scss-mode sass-mode reverse-theme request railscasts-theme py-isort purple-haze-theme professional-theme popwin planet-theme pip-requirements pcre2el pastels-on-dark-theme parent-mode paradox org-bullets open-junk-file omtose-phellack-theme oldlace-theme occidental-theme noctilux-theme niflheim-theme naquadah-theme monochrome-theme molokai-theme minimal-theme material-theme majapahit-theme madhat2r-theme macrostep lush-theme lorem-ipsum livid-mode linum-relative light-soap-theme less-css-mode json-snatcher json-reformat js-doc ir-black-theme indent-guide hide-comnt heroku-theme hemisu-theme help-fns+ helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme google-translate golden-ratio git-gutter-fringe git-gutter-fringe+ gandalf-theme fuzzy flycheck-pos-tip flx-ido flatui-theme flatland-theme fish-mode firebelly-theme fill-column-indicator farmhouse-theme fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu espresso-theme emmet-mode elisp-slime-nav dumb-jump dracula-theme django-theme diminish diff-hl define-word darktooth-theme darkokai-theme darkmine-theme darkburn-theme dakrone-theme cython-mode cyberpunk-theme company-web company-tern company-statistics company-shell company-anaconda column-enforce-mode color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized coffee-mode clues-theme clean-aindent-mode cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme bind-key badwolf-theme auto-yasnippet auto-highlight-symbol auto-compile apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes aggressive-indent afternoon-theme adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))))
+    (smeargle orgit magit-gitflow helm-gitignore gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link evil-magit magit magit-popup git-commit ghub async let-alist with-editor dash csv-mode zenburn-theme zen-and-art-theme yapfify ws-butler winum white-sand-theme which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme toml-mode toc-org tao-theme tangotango-theme tango-plus-theme tango-2-theme tagedit sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spaceline spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme slim-mode seti-theme scss-mode sass-mode reverse-theme restart-emacs request rebecca-theme rainbow-delimiters railscasts-theme racer pyvenv pytest pyenv-mode py-isort purple-haze-theme pug-mode professional-theme popwin planet-theme pip-requirements phoenix-dark-pink-theme phoenix-dark-mono-theme persp-mode pcre2el paradox organic-green-theme org-plus-contrib org-bullets open-junk-file omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme neotree naquadah-theme mustang-theme move-text monokai-theme monochrome-theme molokai-theme moe-theme minimal-theme material-theme majapahit-theme madhat2r-theme macrostep lush-theme lorem-ipsum livid-mode live-py-mode linum-relative link-hint light-soap-theme less-css-mode json-mode js2-refactor js-doc jbeans-theme jazz-theme ir-black-theme insert-shebang inkpot-theme indent-guide hy-mode hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides heroku-theme hemisu-theme helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme google-translate golden-ratio git-gutter-fringe git-gutter-fringe+ gandalf-theme fuzzy flycheck-rust flycheck-pos-tip flx-ido flatui-theme flatland-theme fish-mode fill-column-indicator farmhouse-theme fancy-battery eyebrowse expand-region exotica-theme exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu espresso-theme emmet-mode elisp-slime-nav dumb-jump dracula-theme django-theme diminish diff-hl define-word darktooth-theme darkokai-theme darkmine-theme darkburn-theme dakrone-theme cython-mode cyberpunk-theme company-web company-tern company-statistics company-shell company-anaconda column-enforce-mode color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized coffee-mode clues-theme clean-aindent-mode cherry-blossom-theme cargo busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme auto-yasnippet auto-highlight-symbol auto-compile apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes aggressive-indent afternoon-theme adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
